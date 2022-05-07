@@ -1,0 +1,14 @@
+port: 8080
+
+gorm:
+  log-level: info
+mysql:
+  host: localhost:3306
+  database: douyin_db
+  username: root
+  password: admin
+
+jwt:
+  issuer: douyin
+  secret: example
+  expires-in: 2h
