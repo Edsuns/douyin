@@ -1,12 +1,14 @@
 package validate
 
 import (
+	"douyin/pkg/com"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"net/http"
+	"strings"
 )
 
 var trans ut.Translator
@@ -34,7 +36,10 @@ func bind[T any](c *gin.Context, bind func(obj interface{}) error, obj *T) *T {
 		for _, e := range validationErrors {
 			errors = append(errors, e.Translate(trans))
 		}
-		c.AbortWithStatusJSON(http.StatusBadRequest, errors)
+		c.AbortWithStatusJSON(http.StatusBadRequest, com.Response{
+			StatusCode: http.StatusBadRequest,
+			StatusMsg:  strings.Join(errors, "; "),
+		})
 		return nil
 	}
 	// if valid

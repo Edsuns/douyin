@@ -1,12 +1,13 @@
 package api
 
 import (
+	"douyin/pkg/com"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type CommentListResponse struct {
-	Response
+	com.Response
 	CommentList []Comment `json:"comment_list,omitempty"`
 }
 
@@ -15,16 +16,16 @@ func CommentAction(c *gin.Context) {
 	token := c.Query("token")
 
 	if _, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 0})
+		c.JSON(http.StatusOK, com.Response{StatusCode: 0})
 	} else {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		c.JSON(http.StatusOK, com.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 	}
 }
 
 // CommentList all videos have same demo comment list
 func CommentList(c *gin.Context) {
 	c.JSON(http.StatusOK, CommentListResponse{
-		Response:    Response{StatusCode: 0},
+		Response:    com.Response{StatusCode: 0},
 		CommentList: DemoComments,
 	})
 }

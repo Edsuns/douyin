@@ -2,6 +2,7 @@ package api
 
 import (
 	"douyin/app/service"
+	"douyin/pkg/com"
 	"douyin/pkg/security"
 	"douyin/pkg/validate"
 	"github.com/gin-gonic/gin"
@@ -22,13 +23,13 @@ var usersLoginInfo = map[string]User{
 }
 
 type UserLoginResponse struct {
-	Response
+	com.Response
 	UserId int64  `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
 type UserResponse struct {
-	Response
+	com.Response
 	User User `json:"user"`
 }
 
@@ -46,11 +47,11 @@ func Register(c *gin.Context) {
 	user, err := service.Register(rq.Username, rq.Password)
 	if err != nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: err.Error()},
+			Response: com.Response{StatusCode: 1, StatusMsg: err.Error()},
 		})
 	} else {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
+			Response: com.Response{StatusCode: 0},
 			UserId:   user.ID,
 			Token:    service.GetTokenForUser(user),
 		})
@@ -65,13 +66,13 @@ func Login(c *gin.Context) {
 
 	if user, token := service.Login(rq.Username, rq.Password); token != nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
+			Response: com.Response{StatusCode: 0},
 			UserId:   user.ID,
 			Token:    *token,
 		})
 	} else {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "invalid username and password"},
+			Response: com.Response{StatusCode: 1, StatusMsg: "invalid username and password"},
 		})
 	}
 }
@@ -81,7 +82,7 @@ func UserInfo(c *gin.Context) {
 
 	if user := service.GetUserInfo(userId); user != nil {
 		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 0},
+			Response: com.Response{StatusCode: 0},
 			User: User{
 				Id:   user.ID,
 				Name: user.Username,
@@ -89,7 +90,7 @@ func UserInfo(c *gin.Context) {
 		})
 	} else {
 		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: com.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	}
 }

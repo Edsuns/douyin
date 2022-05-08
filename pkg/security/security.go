@@ -1,8 +1,9 @@
 package security
 
 import (
-	"douyin/app/errs"
+	"douyin/pkg/com"
 	"douyin/pkg/util"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -22,6 +23,8 @@ const (
 var (
 	config       JwtConfig
 	ignoreRoutes = make(map[string]bool)
+
+	JwtExpired = errors.New("jwt expired")
 )
 
 func Setup(jwtConfig JwtConfig) {
@@ -60,7 +63,10 @@ func securityMiddleware(ctx *gin.Context) {
 		// get bearer token if query token doesn't exist
 		token = util.GetBearerToken(ctx)
 		if token == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, "bearer token not found")
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, com.Response{
+				StatusCode: http.StatusUnauthorized,
+				StatusMsg:  "token required",
+			})
 			return
 		}
 	}
@@ -81,7 +87,7 @@ func getUserIdFromToken(token string) (int64, error) {
 		return 0, err
 	}
 	if util.IsJwtExpired(jwt) {
-		return 0, errs.JwtExpired
+		return 0, JwtExpired
 	}
 	return jwt.UserId, nil
 }
