@@ -33,12 +33,12 @@ type UserResponse struct {
 }
 
 type UsrPwd struct {
-	Username string `validate:"required,min=4"`
-	Password string `validate:"required,min=8"`
+	Username string `form:"username" validate:"required,min=4"`
+	Password string `form:"password" validate:"required,min=8"`
 }
 
 func Register(c *gin.Context) {
-	rq := validate.Struct(c, &UsrPwd{})
+	rq := validate.StructQuery(c, &UsrPwd{})
 	if rq == nil {
 		return
 	}
@@ -58,7 +58,7 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	rq := validate.Struct(c, &UsrPwd{})
+	rq := validate.StructQuery(c, &UsrPwd{})
 	if rq == nil {
 		return
 	}
