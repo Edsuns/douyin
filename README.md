@@ -16,7 +16,6 @@
 ├─app
 │  │  main.go         ──── 项目入口
 │  │  router.go       ──── API路由配置
-│  │  security.go     ──── 鉴权
 │  │
 │  ├─api              ──── [API层]
 │  │    responses.go  ──── 响应结构体

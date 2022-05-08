@@ -3,16 +3,18 @@ package main
 import (
 	"douyin/app/config"
 	"douyin/app/dao"
+	"douyin/pkg/security"
 	"log"
 )
 
-func main() {
+func init() {
 	config.Setup("./config.yaml")
+	security.Setup(config.Val.Jwt)
 	dao.Setup()
+}
 
-	r := SetupRouter()
-
-	err := r.Run(":" + config.Val.Port)
+func main() {
+	err := SetupRouter().Run(":" + config.Val.Port)
 	if err != nil {
 		log.Fatalln(err)
 	}

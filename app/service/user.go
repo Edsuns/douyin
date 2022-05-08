@@ -1,9 +1,9 @@
 package service
 
 import (
-	"douyin/app/config"
 	"douyin/app/dao"
 	"douyin/app/errs"
+	"douyin/pkg/security"
 	"douyin/pkg/util"
 )
 
@@ -49,11 +49,7 @@ func Login(username, password string) (*dao.User, *string) {
 
 // GetTokenForUser returns token signed for the User
 func GetTokenForUser(user *dao.User) string {
-	secret := []byte(config.Val.Jwt.Secret)
-	token, err := util.GenerateJwt(user.ID,
-		config.Val.Jwt.Issuer,
-		config.Val.Jwt.ExpiresIn,
-		secret)
+	token, err := security.GenerateJwt(user.ID)
 	if err != nil {
 		panic("failed to sign jwt")
 	}

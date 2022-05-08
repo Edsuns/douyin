@@ -2,6 +2,7 @@ package main
 
 import (
 	"douyin/app/api"
+	"douyin/pkg/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,9 +13,8 @@ func SetupRouter() *gin.Engine {
 }
 
 func initRouter(r *gin.Engine) {
-	// setup SecurityMiddleware
-	r.Use(SecurityMiddleware)
-	PublicRoutes("/douyin/user/register/", "/douyin/user/login/")
+	// bind security middleware
+	security.Bind(r, "/douyin/user/register/", "/douyin/user/login/")
 
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")

@@ -1,12 +1,13 @@
 package config
 
 import (
+	"douyin/pkg/database"
+	"douyin/pkg/security"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"reflect"
-	"time"
 )
 
 type Config struct {
@@ -15,18 +16,9 @@ type Config struct {
 	Gorm struct {
 		LogLevel string `yaml:"log-level"`
 	}
-	Mysql struct {
-		Host     string
-		Database string
-		Username string
-		Password string
-	}
+	Mysql database.MysqlConfig
 
-	Jwt struct {
-		Issuer    string
-		Secret    string
-		ExpiresIn time.Duration `yaml:"expires-in"`
-	}
+	Jwt security.JwtConfig
 }
 
 var Val *Config
