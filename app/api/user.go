@@ -2,6 +2,7 @@ package api
 
 import (
 	"douyin/app/service"
+	"douyin/pkg/security"
 	"douyin/pkg/validate"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -76,7 +77,7 @@ func Login(c *gin.Context) {
 }
 
 func UserInfo(c *gin.Context) {
-	userId := c.GetInt64("userId")
+	userId := security.GetUserId(c)
 
 	if user := service.GetUserInfo(userId); user != nil {
 		c.JSON(http.StatusOK, UserResponse{

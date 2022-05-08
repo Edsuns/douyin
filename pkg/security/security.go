@@ -14,6 +14,11 @@ type JwtConfig struct {
 	ExpiresIn time.Duration `yaml:"expires-in"`
 }
 
+const (
+	tokenKey  = "token"
+	userIdKey = "userId"
+)
+
 var (
 	config       JwtConfig
 	ignoreRoutes = make(map[string]bool)
@@ -35,6 +40,10 @@ func GenerateJwt(userId int64) (string, error) {
 		config.ExpiresIn, []byte(config.Secret))
 }
 
+func GetUserId(ctx *gin.Context) int64 {
+	return ctx.GetInt64(userIdKey)
+}
+
 // securityMiddleware filters unauthorized requests
 func securityMiddleware(ctx *gin.Context) {
 	// ignore unmatched routes
@@ -45,11 +54,15 @@ func securityMiddleware(ctx *gin.Context) {
 	if ignoreRoutes[ctx.FullPath()] {
 		return
 	}
-	// get bearer token
-	token, err := util.GetBearerToken(ctx)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, err.Error())
-		return
+	// get token from query
+	var token = ctx.Query(tokenKey)
+	if token == "" {
+		// get bearer token if query token doesn't exist
+		token = util.GetBearerToken(ctx)
+		if token == "" {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, "bearer token not found")
+			return
+		}
 	}
 	// verify token and get user id
 	userId, err := getUserIdFromToken(token)
@@ -58,7 +71,7 @@ func securityMiddleware(ctx *gin.Context) {
 		return
 	}
 	// attach user id to context
-	ctx.Set("userId", userId)
+	ctx.Set(userIdKey, userId)
 }
 
 // getUserIdFromToken verifies token and returns user id

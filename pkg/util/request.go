@@ -1,16 +1,13 @@
 package util
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 )
 
-var BearerTokenNotFound = errors.New("bearer token not found")
-
-func GetBearerToken(c *gin.Context) (string, error) {
+func GetBearerToken(c *gin.Context) string {
 	token := c.GetHeader("Authorization")
 	if len(token) <= 7 {
-		return "", BearerTokenNotFound
+		return ""
 	}
-	return token[7:], nil
+	return token[7:]
 }
