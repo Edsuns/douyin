@@ -2,6 +2,7 @@ package api
 
 import (
 	"douyin/app/service"
+	"douyin/pkg/validate"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -30,15 +31,18 @@ type UserResponse struct {
 	User User `json:"user"`
 }
 
+type UsrPwd struct {
+	Username string `validate:"required,min=4"`
+	Password string `validate:"required,min=8"`
+}
+
 func Register(c *gin.Context) {
-	username, u := c.GetPostForm("username")
-	password, p := c.GetPostForm("password")
-	if !u || !p {
-		c.Status(http.StatusBadRequest)
+	rq := validate.Struct(c, &UsrPwd{})
+	if rq == nil {
 		return
 	}
 
-	user, err := service.Register(username, password)
+	user, err := service.Register(rq.Username, rq.Password)
 	if err != nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: err.Error()},
@@ -53,14 +57,12 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	username, u := c.GetPostForm("username")
-	password, p := c.GetPostForm("password")
-	if !u || !p {
-		c.Status(http.StatusBadRequest)
+	rq := validate.Struct(c, &UsrPwd{})
+	if rq == nil {
 		return
 	}
 
-	if user, token := service.Login(username, password); token != nil {
+	if user, token := service.Login(rq.Username, rq.Password); token != nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
 			UserId:   user.ID,
