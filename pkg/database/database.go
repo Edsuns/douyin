@@ -42,7 +42,7 @@ func connect(logLevel logger.LogLevel, c MysqlConfig) *gorm.DB {
 		Logger: logger.Default.LogMode(logLevel),
 	})
 	if err != nil {
-		panic("database connection failed")
+		panic(err)
 	}
 	return db
 }

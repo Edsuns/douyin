@@ -16,3 +16,7 @@ func Setup() {
 		panic(err)
 	}
 }
+
+func TruncateAllTables() {
+	db.Exec("truncate table users")
+}
