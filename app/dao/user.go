@@ -5,9 +5,11 @@ import (
 )
 
 type User struct {
-	ID       int64  `gorm:"primary_key" json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Model
+	ID       int64   `gorm:"primary_key" json:"id"`
+	Username string  `gorm:"uniqueIndex;not null;size:63" json:"username"`
+	Password string  `gorm:"not null;size:60" json:"password"`
+	Profile  Profile `json:"-"`
 }
 
 func SaveUser(username, password string) (bool, error) {
