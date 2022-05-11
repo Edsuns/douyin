@@ -1,4 +1,4 @@
-package util
+package security
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -10,8 +10,8 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// GenerateJwt generate tokens used for auth
-func GenerateJwt(userId int64, issuer string, expiresIn time.Duration, secret []byte) (string, error) {
+// SignJwt generate tokens used for auth
+func SignJwt(userId int64, issuer string, expiresIn time.Duration, secret []byte) (string, error) {
 	nowTime := time.Now()
 	expiresAt := nowTime.Add(expiresIn)
 

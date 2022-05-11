@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"douyin/pkg/util"
+	"douyin/pkg/security"
 )
 
 type User struct {
@@ -13,7 +13,7 @@ type User struct {
 func SaveUser(username, password string) (bool, error) {
 	result := db.Create(&User{
 		Username: username,
-		Password: util.EncodePassword(password),
+		Password: security.EncodePassword(password),
 	})
 	return result.RowsAffected > 0, result.Error
 }

@@ -3,14 +3,14 @@ package service
 import (
 	"douyin/app/dao"
 	"douyin/app/errs"
+	"douyin/pkg/assert"
 	"douyin/pkg/security"
-	"douyin/pkg/util"
 )
 
 // Register create a new account
 func Register(username, password string) (*dao.User, error) {
 	// validate the params
-	if err := util.NotEmpty(username, password); err != nil {
+	if err := assert.NotEmpty(username, password); err != nil {
 		return nil, err
 	}
 	// check if exists
@@ -38,7 +38,7 @@ func Login(username, password string) (*dao.User, *string) {
 		return nil, nil
 	}
 	// verify the password
-	if util.VerifyPassword(password, user.Password) {
+	if security.VerifyPassword(password, user.Password) {
 		// password is valid, returns token
 		token := GetTokenForUser(user)
 		return user, &token

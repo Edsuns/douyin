@@ -3,7 +3,7 @@ package service
 import (
 	"douyin/app/config"
 	"douyin/app/dao"
-	"douyin/pkg/util"
+	"douyin/pkg/security"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -33,7 +33,7 @@ func TestRegister(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, user.ID > 0)
 	assert.Equal(t, expectedUsr, user.Username)
-	assert.True(t, util.VerifyPassword(expectedPwd, user.Password))
+	assert.True(t, security.VerifyPassword(expectedPwd, user.Password))
 
 	// action register with empty values
 	user, err = Register("", "pwd")
@@ -68,7 +68,7 @@ func TestLogin(t *testing.T) {
 	assert.NotNil(t, token)
 	assert.True(t, user.ID > 0)
 	assert.Equal(t, usr, user.Username)
-	assert.True(t, util.VerifyPassword(pwd, user.Password))
+	assert.True(t, security.VerifyPassword(pwd, user.Password))
 
 	// action login with invalid password
 	user, token = Login("test", "test_pwd_")

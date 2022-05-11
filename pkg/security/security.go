@@ -2,7 +2,6 @@ package security
 
 import (
 	"douyin/pkg/com"
-	"douyin/pkg/util"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -39,7 +38,7 @@ func Bind(engine *gin.Engine, ignore ...string) {
 }
 
 func GenerateJwt(userId int64) (string, error) {
-	return util.GenerateJwt(userId, config.Issuer,
+	return SignJwt(userId, config.Issuer,
 		config.ExpiresIn, []byte(config.Secret))
 }
 
@@ -61,7 +60,7 @@ func securityMiddleware(ctx *gin.Context) {
 	var token = ctx.Query(tokenKey)
 	if token == "" {
 		// get bearer token if query token doesn't exist
-		token = util.GetBearerToken(ctx)
+		token = GetBearerToken(ctx)
 		if token == "" {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, com.Response{
 				StatusCode: http.StatusUnauthorized,
@@ -82,11 +81,11 @@ func securityMiddleware(ctx *gin.Context) {
 
 // getUserIdFromToken verifies token and returns user id
 func getUserIdFromToken(token string) (int64, error) {
-	jwt, err := util.ParseJwt(token, []byte(config.Secret))
+	jwt, err := ParseJwt(token, []byte(config.Secret))
 	if err != nil {
 		return 0, err
 	}
-	if util.IsJwtExpired(jwt) {
+	if IsJwtExpired(jwt) {
 		return 0, JwtExpired
 	}
 	return jwt.UserId, nil
