@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 	"reflect"
 )
 
@@ -27,7 +26,7 @@ func Setup(config string) {
 	var err error
 	Val, err = loadConfig(config)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
