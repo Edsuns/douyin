@@ -22,7 +22,7 @@ const (
 
 var (
 	config       JwtConfig
-	ignoreRoutes = make(map[string]bool)
+	ignoreRoutes = make(map[string]struct{})
 
 	JwtExpired = errors.New("jwt expired")
 )
@@ -33,7 +33,7 @@ func Setup(jwtConfig JwtConfig) {
 
 func Bind(engine *gin.Engine, ignore ...string) {
 	for _, val := range ignore {
-		ignoreRoutes[val] = true
+		ignoreRoutes[val] = struct{}{}
 	}
 	engine.Use(securityMiddleware)
 }
@@ -54,7 +54,7 @@ func securityMiddleware(ctx *gin.Context) {
 		return
 	}
 	// ignore routes that configured in ignoreRoutes
-	if ignoreRoutes[ctx.FullPath()] {
+	if _, contains := ignoreRoutes[ctx.FullPath()]; contains {
 		return
 	}
 	// get token from query
