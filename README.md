@@ -4,11 +4,12 @@
 
 ## 技术栈
 
-- GO
-- Gin
-- GORM
-- MySQL
-- JWT
+- [GO](https://go.dev/)
+- [Gin](https://github.com/gin-gonic/gin)
+- [GORM](https://github.com/go-gorm/gorm)
+- [MySQL](https://www.mysql.com/)
+- [JWT](https://github.com/dgrijalva/jwt-go)
+- [乐观锁](https://github.com/go-gorm/optimisticlock)
 
 ## 项目文件介绍
 
@@ -19,12 +20,17 @@
 │  │
 │  ├─api              ──── [API层]
 │  │    responses.go  ──── 响应结构体
+│  │    user.go       ──── 注册、登录、查询用户信息
+│  │    relation.go   ──── 关注、粉丝
+│  │    feed.go       ──── 视频流
+│  │    publish.go    ──── 视频投稿
+│  │    comment.go    ──── 视频评论
+│  │    favorite.go   ──── 视频点赞
 │  │
 │  ├─config           ──── [项目配置]
 │  │
 │  ├─dao              ──── [持久化层]
 │  │    db.go         ──── 数据库初始化
-│  │    user.go       ──── 注册、登录、查询用户信息
 │  │
 │  ├─errs             ──── [错误管理]
 │  │
