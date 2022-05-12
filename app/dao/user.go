@@ -68,7 +68,7 @@ func GetUserByUsername(username string) *User {
 
 func GetUserByUserId(userId int64) *User {
 	var user User
-	db.First(&user, "id = ?", userId)
+	db.First(&user, userId)
 	if user.ID > 0 {
 		return &user
 	}

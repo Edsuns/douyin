@@ -57,3 +57,13 @@ func IsFollowed(userId, followerId int64) bool {
 	yes, _ := dao.HasFollower(userId, followerId)
 	return yes
 }
+
+func Follow(userId, followerId int64, discard bool) bool {
+	var err error
+	if discard {
+		err = dao.RemoveFollower(userId, followerId)
+	} else {
+		err = dao.AddFollower(userId, followerId)
+	}
+	return err == nil
+}
