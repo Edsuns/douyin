@@ -7,6 +7,7 @@ import (
 	"douyin/pkg/validate"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 // usersLoginInfo use map to store user info, and key is username+password for demo
@@ -25,7 +26,7 @@ var usersLoginInfo = map[string]User{
 type UserLoginResponse struct {
 	com.Response
 	UserId int64  `json:"user_id,omitempty"`
-	Token  string `json:"token"`
+	Token  string `json:"token,omitempty"`
 }
 
 type UserResponse struct {
@@ -78,19 +79,26 @@ func Login(c *gin.Context) {
 }
 
 func UserInfo(c *gin.Context) {
-	userId := security.GetUserId(c)
+	myUserId := security.GetUserId(c)
+	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if err != nil {
+		userId = myUserId
+	}
 
-	if user := service.GetUserInfo(userId); user != nil {
+	if profile := service.GetUserInfo(userId); profile != nil {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: com.Response{StatusCode: 0},
 			User: User{
-				Id:   user.ID,
-				Name: user.Username,
+				Id:            profile.UserID,
+				Name:          profile.Name,
+				FollowCount:   profile.FollowCount,
+				FollowerCount: profile.FollowerCount,
+				IsFollow:      service.IsFollowed(userId, myUserId),
 			},
 		})
 	} else {
 		c.JSON(http.StatusOK, UserResponse{
-			Response: com.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: com.Response{StatusCode: 1, StatusMsg: "user doesn't exist"},
 		})
 	}
 }

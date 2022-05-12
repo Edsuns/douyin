@@ -23,7 +23,8 @@ var (
 	config       JwtConfig
 	ignoreRoutes = make(map[string]struct{})
 
-	JwtExpired = errors.New("jwt expired")
+	JwtExpired    = errors.New("jwt expired")
+	TokenRequired = errors.New("token required")
 )
 
 func Setup(jwtConfig JwtConfig) {
@@ -52,31 +53,40 @@ func securityMiddleware(ctx *gin.Context) {
 	if ctx.FullPath() == "" {
 		return
 	}
-	// ignore routes that configured in ignoreRoutes
-	if _, contains := ignoreRoutes[ctx.FullPath()]; contains {
+	// if there is a valid token, attach it to the context
+	// otherwise, abort the request if the route are not configured in ignoreRoutes
+	_, ignore := ignoreRoutes[ctx.FullPath()]
+	userId, err := getUserIdFromContext(ctx)
+	if err != nil && !ignore {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, com.Response{
+			StatusCode: http.StatusUnauthorized,
+			StatusMsg:  err.Error(),
+		})
 		return
 	}
+	if err == nil {
+		// attach user id to the context
+		ctx.Set(userIdKey, userId)
+	}
+}
+
+// getUserIdFromContext returns user id parsed from token, or error if there is not a valid token
+func getUserIdFromContext(ctx *gin.Context) (int64, error) {
 	// get token from query
 	var token = ctx.Query(tokenKey)
 	if token == "" {
 		// get bearer token if query token doesn't exist
 		token = GetBearerToken(ctx)
 		if token == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, com.Response{
-				StatusCode: http.StatusUnauthorized,
-				StatusMsg:  "token required",
-			})
-			return
+			return 0, TokenRequired
 		}
 	}
 	// verify token and get user id
 	userId, err := getUserIdFromToken(token)
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		return 0, err
 	}
-	// attach user id to context
-	ctx.Set(userIdKey, userId)
+	return userId, nil
 }
 
 // getUserIdFromToken verifies token and returns user id

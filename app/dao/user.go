@@ -2,6 +2,7 @@ package dao
 
 import (
 	"douyin/pkg/security"
+	"errors"
 )
 
 type User struct {
@@ -12,12 +13,48 @@ type User struct {
 	Profile  Profile `json:"-"`
 }
 
-func SaveUser(username, password string) (bool, error) {
-	result := db.Create(&User{
+func SaveUserAndProfile(username, password string) (*User, error) {
+	// start a transaction
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	var err error
+
+	// insert User
+	err = tx.Create(&User{
 		Username: username,
 		Password: security.EncodePassword(password),
-	})
-	return result.RowsAffected > 0, result.Error
+	}).Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// query User ID
+	var user User
+	err = tx.First(&user, "username = ?", username).Error
+	if user.ID == 0 || err != nil {
+		tx.Rollback()
+		return nil, errors.New("can't get user after inserted")
+	}
+
+	// insert Profile
+	err = tx.Create(&Profile{
+		UserID: user.ID,
+		Name:   username,
+	}).Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func GetUserByUsername(username string) *User {

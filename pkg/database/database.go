@@ -29,6 +29,7 @@ func parseGormLogLevel(level string) logger.LogLevel {
 	case "warn":
 		logLevel = logger.Warn
 	case "info":
+		logLevel = logger.Info
 	default:
 		logLevel = logger.Info
 	}

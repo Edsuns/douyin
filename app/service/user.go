@@ -18,16 +18,8 @@ func Register(username, password string) (*dao.User, error) {
 		return nil, errs.UserAlreadyExists
 	}
 	// insert into database if not exist
-	saved, err := dao.SaveUser(username, password)
-	if !saved {
-		return nil, err
-	}
-	user := dao.GetUserByUsername(username)
-	if user == nil {
-		panic("impossible: can't get user after saved")
-	}
-	// new user successfully created
-	return user, nil
+	user, err := dao.SaveUserAndProfile(username, password)
+	return user, err
 }
 
 // Login returns User and token if login successfully, or both nil
@@ -57,6 +49,11 @@ func GetTokenForUser(user *dao.User) string {
 }
 
 // GetUserInfo returns User
-func GetUserInfo(userId int64) *dao.User {
-	return dao.GetUserByUserId(userId)
+func GetUserInfo(userId int64) *dao.Profile {
+	return dao.GetProfileByUserId(userId)
+}
+
+func IsFollowed(userId, followerId int64) bool {
+	yes, _ := dao.HasFollower(userId, followerId)
+	return yes
 }

@@ -27,5 +27,14 @@ func Setup() {
 }
 
 func TruncateAllTables() {
+	// truncate many to many first
+	db.Exec("truncate table profile_followers")
+	db.Exec("truncate table video_favorites")
+
+	// truncate in specific order
+	db.Exec("truncate table comments")
+	db.Exec("truncate table videos")
+	db.Exec("truncate table media_files")
+	db.Exec("truncate table profiles")
 	db.Exec("truncate table users")
 }
