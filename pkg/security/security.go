@@ -23,8 +23,8 @@ var (
 	config       JwtConfig
 	ignoreRoutes = make(map[string]struct{})
 
-	JwtExpired    = errors.New("jwt expired")
-	TokenRequired = errors.New("token required")
+	ErrJwtExpired    = errors.New("jwt expired")
+	ErrTokenRequired = errors.New("token required")
 )
 
 func Setup(jwtConfig JwtConfig) {
@@ -78,7 +78,7 @@ func getUserIdFromContext(ctx *gin.Context) (int64, error) {
 		// get bearer token if query token doesn't exist
 		token = GetBearerToken(ctx)
 		if token == "" {
-			return 0, TokenRequired
+			return 0, ErrTokenRequired
 		}
 	}
 	// verify token and get user id
@@ -96,7 +96,7 @@ func getUserIdFromToken(token string) (int64, error) {
 		return 0, err
 	}
 	if IsJwtExpired(jwt) {
-		return 0, JwtExpired
+		return 0, ErrJwtExpired
 	}
 	return jwt.UserId, nil
 }
