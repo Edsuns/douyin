@@ -1,10 +1,10 @@
 package api
 
 import (
+	"douyin/app/errs"
 	"douyin/pkg/com"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"path/filepath"
 )
 
@@ -18,16 +18,13 @@ func Publish(c *gin.Context) {
 	token := c.Query("token")
 
 	if _, exist := usersLoginInfo[token]; !exist {
-		c.JSON(http.StatusOK, com.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		com.Error(c, errs.UserNotFound)
 		return
 	}
 
 	data, err := c.FormFile("data")
 	if err != nil {
-		c.JSON(http.StatusOK, com.Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+		com.Error(c, err)
 		return
 	}
 
@@ -36,25 +33,18 @@ func Publish(c *gin.Context) {
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
 	if err := c.SaveUploadedFile(data, saveFile); err != nil {
-		c.JSON(http.StatusOK, com.Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+		com.Error(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, com.Response{
-		StatusCode: 0,
-		StatusMsg:  finalName + " uploaded successfully",
+	com.Success(c, &com.Response{
+		StatusMsg: finalName + " uploaded successfully",
 	})
 }
 
 // PublishList all users have same publish video list
 func PublishList(c *gin.Context) {
-	c.JSON(http.StatusOK, VideoListResponse{
-		Response: com.Response{
-			StatusCode: 0,
-		},
+	com.Success(c, &VideoListResponse{
 		VideoList: DemoVideos,
 	})
 }

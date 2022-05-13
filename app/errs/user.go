@@ -1,7 +1,15 @@
 package errs
 
-import "errors"
+import "douyin/pkg/com"
+
+const (
+	CodeInvalidPwdAndUsr = BaseUser + iota
+	CodeUserAlreadyExists
+	CodeUserNotFound
+)
 
 var (
-	UserAlreadyExists = errors.New("user already exist")
+	InvalidPwdAndUsr  = com.NewAPIError(CodeInvalidPwdAndUsr, "invalid username and password")
+	UserAlreadyExists = com.NewAPIError(CodeUserAlreadyExists, "user already exist")
+	UserNotFound      = com.NewAPIError(CodeUserNotFound, "user not found")
 )

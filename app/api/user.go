@@ -1,12 +1,12 @@
 package api
 
 import (
+	"douyin/app/errs"
 	"douyin/app/service"
 	"douyin/pkg/com"
 	"douyin/pkg/security"
 	"douyin/pkg/validate"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"strconv"
 )
 
@@ -23,7 +23,7 @@ var usersLoginInfo = map[string]User{
 	},
 }
 
-type UserLoginResponse struct {
+type UserAuthResponse struct {
 	com.Response
 	UserId int64  `json:"user_id,omitempty"`
 	Token  string `json:"token,omitempty"`
@@ -47,14 +47,11 @@ func Register(c *gin.Context) {
 
 	user, err := service.Register(rq.Username, rq.Password)
 	if err != nil {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: com.Response{StatusCode: 1, StatusMsg: err.Error()},
-		})
+		com.Error(c, err)
 	} else {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: com.Response{StatusCode: 0},
-			UserId:   user.ID,
-			Token:    service.GetTokenForUser(user),
+		com.Success(c, &UserAuthResponse{
+			UserId: user.ID,
+			Token:  service.GetTokenForUser(user),
 		})
 	}
 }
@@ -66,15 +63,12 @@ func Login(c *gin.Context) {
 	}
 
 	if user, token := service.Login(rq.Username, rq.Password); token != nil {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: com.Response{StatusCode: 0},
-			UserId:   user.ID,
-			Token:    *token,
+		com.Success(c, &UserAuthResponse{
+			UserId: user.ID,
+			Token:  *token,
 		})
 	} else {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: com.Response{StatusCode: 1, StatusMsg: "invalid username and password"},
-		})
+		com.Error(c, errs.InvalidPwdAndUsr)
 	}
 }
 
@@ -86,8 +80,7 @@ func UserInfo(c *gin.Context) {
 	}
 
 	if profile := service.GetUserInfo(userId); profile != nil {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: com.Response{StatusCode: 0},
+		com.Success(c, &UserResponse{
 			User: User{
 				Id:            profile.UserID,
 				Name:          profile.Name,
@@ -97,8 +90,6 @@ func UserInfo(c *gin.Context) {
 			},
 		})
 	} else {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: com.Response{StatusCode: 1, StatusMsg: "user doesn't exist"},
-		})
+		com.Error(c, errs.UserNotFound)
 	}
 }

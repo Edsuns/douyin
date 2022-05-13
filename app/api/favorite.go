@@ -1,9 +1,9 @@
 package api
 
 import (
+	"douyin/app/errs"
 	"douyin/pkg/com"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // FavoriteAction no practical effect, just check if token is valid
@@ -11,18 +11,15 @@ func FavoriteAction(c *gin.Context) {
 	token := c.Query("token")
 
 	if _, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, com.Response{StatusCode: 0})
+		com.SuccessStatus(c)
 	} else {
-		c.JSON(http.StatusOK, com.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		com.Error(c, errs.UserNotFound)
 	}
 }
 
 // FavoriteList all users have same favorite video list
 func FavoriteList(c *gin.Context) {
-	c.JSON(http.StatusOK, VideoListResponse{
-		Response: com.Response{
-			StatusCode: 0,
-		},
+	com.Success(c, &VideoListResponse{
 		VideoList: DemoVideos,
 	})
 }

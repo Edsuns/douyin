@@ -3,7 +3,6 @@ package api
 import (
 	"douyin/pkg/com"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"time"
 )
 
@@ -15,8 +14,7 @@ type FeedResponse struct {
 
 // Feed same demo video list for every request
 func Feed(c *gin.Context) {
-	c.JSON(http.StatusOK, FeedResponse{
-		Response:  com.Response{StatusCode: 0},
+	com.Success(c, &FeedResponse{
 		VideoList: DemoVideos,
 		NextTime:  time.Now().Unix(),
 	})

@@ -2,6 +2,7 @@ package api
 
 import (
 	"douyin/app/dao"
+	"douyin/app/errs"
 	"douyin/app/service"
 	"douyin/pkg/com"
 	"douyin/pkg/security"
@@ -31,9 +32,9 @@ func RelationAction(c *gin.Context) {
 	userId := security.GetUserId(c)
 
 	if ok := service.Follow(rq.ToUserId, userId, rq.ActionType == 2); ok {
-		c.JSON(http.StatusOK, com.Response{StatusCode: 0})
+		com.SuccessStatus(c)
 	} else {
-		c.JSON(http.StatusOK, com.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		com.Error(c, errs.UserNotFound)
 	}
 }
 
@@ -50,17 +51,11 @@ func FollowList(c *gin.Context) {
 		for _, f := range follows {
 			f.IsFollow = userId == myUserId || service.IsFollowed(f.UserID, myUserId)
 		}
-		c.JSON(http.StatusOK, UserListResponse{
-			Response: com.Response{
-				StatusCode: 0,
-			},
+		com.Success(c, &UserListResponse{
 			UserList: follows,
 		})
 	} else {
-		c.JSON(http.StatusOK, com.Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+		com.Error(c, err)
 	}
 }
 
@@ -77,16 +72,10 @@ func FollowerList(c *gin.Context) {
 		for _, f := range followers {
 			f.IsFollow = service.IsFollowed(f.UserID, myUserId)
 		}
-		c.JSON(http.StatusOK, UserListResponse{
-			Response: com.Response{
-				StatusCode: 0,
-			},
+		com.Success(c, &UserListResponse{
 			UserList: followers,
 		})
 	} else {
-		c.JSON(http.StatusOK, com.Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+		com.Error(c, err)
 	}
 }
