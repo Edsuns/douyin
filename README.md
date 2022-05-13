@@ -4,7 +4,7 @@
 
 ## 技术栈
 
-- [GO](https://go.dev/)
+- [Go](https://go.dev/)
 - [Gin](https://github.com/gin-gonic/gin)
 - [GORM](https://github.com/go-gorm/gorm)
 - [MySQL](https://www.mysql.com/)
@@ -47,8 +47,15 @@
 
 项目配置文件为项目根目录的 [config.yaml](./config.yaml) 文件。启动项目前需做以下准备工作：
 
+- 安装 Go
 - 启动 MySQL 8.0 并确保有一个名为 `douyin_db` 的数据库
 - 在 [config.yaml](./config.yaml) 文件中配置好数据库的地址和账号密码
+
+然后执行此命令即可运行：
+
+```shell
+go run ./app
+```
 
 ## 测试
 
