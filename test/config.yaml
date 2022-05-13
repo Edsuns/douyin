@@ -1,7 +1,12 @@
 port: 8080
 
+static:
+  url-base: http://localhost:8080
+  route: /static
+  filepath: ./tmp/public
+
 gorm:
-  log-level: info
+  log-level: silent
 mysql:
   host: localhost:3306
   database: douyin_test_db

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -53,6 +54,11 @@ func securityMiddleware(ctx *gin.Context) {
 	if ctx.FullPath() == "" {
 		return
 	}
+	// ignore static routes
+	// TODO: find a better way to detect static routes
+	if strings.HasSuffix(ctx.FullPath(), "/*filepath") {
+		return
+	}
 	// if there is a valid token, attach it to the context
 	// otherwise, abort the request if the route are not configured in ignoreRoutes
 	_, ignore := ignoreRoutes[ctx.FullPath()]
@@ -75,10 +81,14 @@ func getUserIdFromContext(ctx *gin.Context) (int64, error) {
 	// get token from query
 	var token = ctx.Query(tokenKey)
 	if token == "" {
-		// get bearer token if query token doesn't exist
-		token = GetBearerToken(ctx)
+		// get token from form
+		token = ctx.PostForm(tokenKey)
 		if token == "" {
-			return 0, ErrTokenRequired
+			// get bearer token
+			token = GetBearerToken(ctx)
+			if token == "" {
+				return 0, ErrTokenRequired
+			}
 		}
 	}
 	// verify token and get user id

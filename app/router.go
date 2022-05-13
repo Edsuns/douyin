@@ -2,6 +2,7 @@ package main
 
 import (
 	"douyin/app/api"
+	"douyin/app/config"
 	"douyin/pkg/security"
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ func initRouter(r *gin.Engine) {
 	security.Bind(r, "/douyin/user/register/", "/douyin/user/login/")
 
 	// public directory is used to serve static resources
-	r.Static("/static", "./public")
+	r.Static(config.Val.Static.Route, config.Val.Static.Filepath)
 
 	apiRouter := r.Group("/douyin")
 

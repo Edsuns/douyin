@@ -1,5 +1,10 @@
 port: 8080
 
+static:
+  url-base: http://localhost:8080
+  route: /static
+  filepath: ./tmp/public
+
 gorm:
   log-level: info
 mysql:

@@ -10,6 +10,7 @@
 - [MySQL](https://www.mysql.com/)
 - [JWT](https://github.com/golang-jwt/jwt)
 - [乐观锁](https://github.com/go-gorm/optimisticlock)
+- [FFmpeg](https://ffmpeg.org/)
 
 ## 文件结构
 
@@ -48,6 +49,7 @@
 项目配置文件为项目根目录的 [config.yaml](./config.yaml) 文件。启动项目前需做以下准备工作：
 
 - 安装 Go
+- 安装 [FFmpeg](https://ffmpeg.org/download.html)
 - 启动 MySQL 8.0 并确保有一个名为 `douyin_db` 的数据库
 - 在 [config.yaml](./config.yaml) 文件中配置好数据库的地址和账号密码
 

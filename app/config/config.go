@@ -12,6 +12,12 @@ import (
 type Config struct {
 	Port string
 
+	Static struct {
+		UrlBase  string `yaml:"url-base"`
+		Route    string
+		Filepath string
+	}
+
 	Gorm struct {
 		LogLevel string `yaml:"log-level"`
 	}
