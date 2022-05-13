@@ -1,0 +1,9 @@
+{
+    "go.formatTool": "gofmt",
+    "go.lintTool": "staticcheck",
+    "go.lintOnSave": "off",
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true
+    }
+}
