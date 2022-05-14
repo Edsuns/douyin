@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -21,8 +20,7 @@ const (
 )
 
 var (
-	config       JwtConfig
-	ignoreRoutes = make(map[string]struct{})
+	config JwtConfig
 
 	ErrJwtExpired    = errors.New("jwt expired")
 	ErrTokenRequired = errors.New("token required")
@@ -30,13 +28,6 @@ var (
 
 func Setup(jwtConfig JwtConfig) {
 	config = jwtConfig
-}
-
-func Bind(engine *gin.Engine, ignore ...string) {
-	for _, val := range ignore {
-		ignoreRoutes[val] = struct{}{}
-	}
-	engine.Use(securityMiddleware)
 }
 
 func GenerateJwt(userId int64) (string, error) {
@@ -48,32 +39,22 @@ func GetUserId(ctx *gin.Context) int64 {
 	return ctx.GetInt64(userIdKey)
 }
 
-// securityMiddleware filters unauthorized requests
-func securityMiddleware(ctx *gin.Context) {
+// Middleware filters unauthorized requests
+func Middleware(ctx *gin.Context) {
 	// ignore unmatched routes
 	if ctx.FullPath() == "" {
 		return
 	}
-	// ignore static routes
-	// TODO: find a better way to detect static routes
-	if strings.HasSuffix(ctx.FullPath(), "/*filepath") {
-		return
-	}
-	// if there is a valid token, attach it to the context
-	// otherwise, abort the request if the route are not configured in ignoreRoutes
-	_, ignore := ignoreRoutes[ctx.FullPath()]
 	userId, err := getUserIdFromContext(ctx)
-	if err != nil && !ignore {
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, com.Response{
 			StatusCode: http.StatusUnauthorized,
 			StatusMsg:  err.Error(),
 		})
 		return
 	}
-	if err == nil {
-		// attach user id to the context
-		ctx.Set(userIdKey, userId)
-	}
+	// attach user id to the context
+	ctx.Set(userIdKey, userId)
 }
 
 // getUserIdFromContext returns user id parsed from token, or error if there is not a valid token
