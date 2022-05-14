@@ -1,7 +1,7 @@
 package config
 
 import (
-	"douyin/pkg/database"
+	"douyin/pkg/dbx"
 	"douyin/pkg/security"
 	"fmt"
 	"gopkg.in/yaml.v2"
@@ -21,7 +21,7 @@ type Config struct {
 	Gorm struct {
 		LogLevel string `yaml:"log-level"`
 	}
-	Mysql database.MysqlConfig
+	Mysql dbx.MysqlConfig
 
 	Jwt security.JwtConfig
 }

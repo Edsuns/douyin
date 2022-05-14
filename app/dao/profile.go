@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"database/sql"
+	"douyin/pkg/dbx"
 	"gorm.io/gorm"
 	"gorm.io/plugin/optimisticlock"
 )
@@ -51,7 +53,7 @@ func HasFollower(userId, followerId int64) (bool, error) {
 func RemoveFollower(userId, followerId int64) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		return removeFollower(tx, userId, followerId)
-	})
+	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
 func removeFollower(tx *gorm.DB, userId, followerId int64) error {
@@ -84,7 +86,7 @@ func removeFollower(tx *gorm.DB, userId, followerId int64) error {
 func AddFollower(userId, followerId int64) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		return addFollower(tx, userId, followerId)
-	})
+	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
 func addFollower(tx *gorm.DB, userId, followerId int64) error {
@@ -122,26 +124,16 @@ func addFollower(tx *gorm.DB, userId, followerId int64) error {
 
 // addFollowerCount with optimistic lock
 func addFollowerCount(tx *gorm.DB, userId int64, amount int64) error {
-	var err error
-	var user Profile
-	err = tx.First(&user, userId).Error
-	if err != nil {
-		return err
-	}
-	user.FollowerCount += amount
-	return tx.Save(&user).Error
+	return dbx.SpinOptimisticLock(tx, userId, func(user *Profile) {
+		user.FollowerCount += amount
+	})
 }
 
 // addFollowCount with optimistic lock
 func addFollowCount(tx *gorm.DB, userId int64, amount int64) error {
-	var err error
-	var user Profile
-	err = tx.First(&user, userId).Error
-	if err != nil {
-		return err
-	}
-	user.FollowCount += amount
-	return tx.Save(&user).Error
+	return dbx.SpinOptimisticLock(tx, userId, func(user *Profile) {
+		user.FollowCount += amount
+	})
 }
 
 func GetFollows(userId int64) ([]*Profile, error) {

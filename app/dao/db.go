@@ -2,7 +2,7 @@ package dao
 
 import (
 	"douyin/app/config"
-	"douyin/pkg/database"
+	"douyin/pkg/dbx"
 	"gorm.io/gorm"
 	"time"
 )
@@ -16,7 +16,7 @@ type Model struct {
 var db *gorm.DB
 
 func Setup() {
-	db = database.Init(config.Val.Gorm.LogLevel, config.Val.Mysql)
+	db = dbx.Init(config.Val.Gorm.LogLevel, config.Val.Mysql)
 
 	err := db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&User{}, &Profile{}, &ProfileFollower{}, &Video{}, &MediaFile{}, &Comment{},
@@ -27,6 +27,9 @@ func Setup() {
 }
 
 func TruncateAllTables() {
+	db.Exec("set foreign_key_checks = 0")
+	defer db.Exec("set foreign_key_checks = 1")
+
 	// truncate many to many first
 	db.Exec("truncate table profile_followers")
 	db.Exec("truncate table video_favorites")
