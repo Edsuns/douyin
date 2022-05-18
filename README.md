@@ -59,6 +59,14 @@
 go run ./app
 ```
 
+若想编译可执行文件，请执行命令：
+
+```shell
+go build -o ./bin/app ./app
+```
+
+这会将可执行文件保存到 `./bin` 目录。
+
 ## 测试
 
 测试环境的配置文件为 [test/config.yaml](./test/config.yaml) ，测试前请做好配置工作。
