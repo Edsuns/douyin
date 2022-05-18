@@ -40,7 +40,8 @@ func connect(logLevel logger.LogLevel, c MysqlConfig) *gorm.DB {
 	url := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		c.Username, c.Password, c.Host, c.Database)
 	db, err := gorm.Open(mysql.Open(url), &gorm.Config{
-		Logger: logger.Default.LogMode(logLevel),
+		Logger:                 logger.Default.LogMode(logLevel),
+		SkipDefaultTransaction: true,
 	})
 	if err != nil {
 		panic(err)
