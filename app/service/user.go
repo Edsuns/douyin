@@ -58,12 +58,15 @@ func IsFollowed(userId, followerId int64) bool {
 	return yes
 }
 
-func Follow(userId, followerId int64, discard bool) bool {
+func Follow(userId, followerId int64, discard bool) error {
+	if userId == followerId {
+		return errs.NotAllowedToFollowYourself
+	}
 	var err error
 	if discard {
 		err = dao.RemoveFollower(userId, followerId)
 	} else {
 		err = dao.AddFollower(userId, followerId)
 	}
-	return err == nil
+	return err
 }

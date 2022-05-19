@@ -2,7 +2,6 @@ package api
 
 import (
 	"douyin/app/dao"
-	"douyin/app/errs"
 	"douyin/app/service"
 	"douyin/pkg/com"
 	"douyin/pkg/security"
@@ -31,10 +30,10 @@ func RelationAction(c *gin.Context) {
 	}
 	userId := security.GetUserId(c)
 
-	if ok := service.Follow(rq.ToUserId, userId, rq.ActionType == 2); ok {
-		com.SuccessStatus(c)
+	if err := service.Follow(rq.ToUserId, userId, rq.ActionType == 2); err != nil {
+		com.Error(c, err)
 	} else {
-		com.Error(c, errs.UserNotFound)
+		com.SuccessStatus(c)
 	}
 }
 
