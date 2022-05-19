@@ -14,7 +14,7 @@ type Config struct {
 	Port string
 
 	Static struct {
-		UrlBase  string `yaml:"url-base"`
+		BaseUrl  string `yaml:"base-url"`
 		Route    string
 		Filepath string
 	}
@@ -59,8 +59,8 @@ func loadConfig(filename string) (*Config, error) {
 
 func loadConfigFromEnv(config *Config) {
 	// static-url-base
-	if urlBase := os.Getenv("static-url-base"); urlBase != "" {
-		config.Static.UrlBase = urlBase
+	if baseUrl := os.Getenv("static-base-url"); baseUrl != "" {
+		config.Static.BaseUrl = baseUrl
 	}
 	// db-name
 	if dbName := os.Getenv("db-name"); dbName != "" {

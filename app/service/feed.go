@@ -18,5 +18,5 @@ func GetVideoFeed(nextTime int64) *[]dao.Video {
 
 func toStaticUrl(fileKey string) string {
 	static := config.Val.Static
-	return fmt.Sprintf("%s%s/%s", static.UrlBase, static.Route, fileKey)
+	return fmt.Sprintf("%s%s/%s", static.BaseUrl, static.Route, fileKey)
 }
