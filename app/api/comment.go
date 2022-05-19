@@ -1,6 +1,7 @@
 package api
 
 import (
+	"douyin/app/dao"
 	"douyin/app/errs"
 	"douyin/pkg/com"
 	"github.com/gin-gonic/gin"
@@ -8,7 +9,7 @@ import (
 
 type CommentListResponse struct {
 	com.Response
-	CommentList []Comment `json:"comment_list,omitempty"`
+	CommentList []dao.Comment `json:"comment_list,omitempty"`
 }
 
 // CommentAction no practical effect, just check if token is valid
@@ -25,6 +26,6 @@ func CommentAction(c *gin.Context) {
 // CommentList all videos have same demo comment list
 func CommentList(c *gin.Context) {
 	com.Success(c, &CommentListResponse{
-		CommentList: DemoComments,
+		CommentList: make([]dao.Comment, 0),
 	})
 }

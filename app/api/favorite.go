@@ -1,6 +1,7 @@
 package api
 
 import (
+	"douyin/app/dao"
 	"douyin/app/errs"
 	"douyin/pkg/com"
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,6 @@ func FavoriteAction(c *gin.Context) {
 // FavoriteList all users have same favorite video list
 func FavoriteList(c *gin.Context) {
 	com.Success(c, &VideoListResponse{
-		VideoList: DemoVideos,
+		VideoList: make([]dao.Video, 0),
 	})
 }
