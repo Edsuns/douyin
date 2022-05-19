@@ -22,7 +22,7 @@ func Feed(c *gin.Context) {
 	// TODO
 	videos := *service.GetVideoFeed(1)
 	for i := 0; i < len(videos); i++ {
-		author := videos[i].Author
+		author := &videos[i].Author
 		author.IsFollow = service.IsFollowed(author.UserID, myUserId)
 	}
 	com.Success(c, &FeedResponse{
