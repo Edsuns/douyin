@@ -4,14 +4,26 @@ import (
 	"douyin/app/dao"
 	"douyin/app/errs"
 	"douyin/pkg/com"
+	"douyin/pkg/security"
+	"douyin/pkg/validate"
 	"github.com/gin-gonic/gin"
 )
 
+type FavoriteRequest struct {
+	videoId    int64 `form:"video_id"`
+	actionType int   `form:"action_type"`
+}
+
 // FavoriteAction no practical effect, just check if token is valid
 func FavoriteAction(c *gin.Context) {
-	token := c.Query("token")
+	myUserId := security.GetUserId(c)
 
-	if _, exist := usersLoginInfo[token]; exist {
+	rq := validate.StructQuery(c, &FavoriteRequest{})
+	if rq == nil {
+		return
+	}
+
+	if myUserId > 0 {
 		com.SuccessStatus(c)
 	} else {
 		com.Error(c, errs.UserNotFound)

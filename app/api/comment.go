@@ -4,8 +4,17 @@ import (
 	"douyin/app/dao"
 	"douyin/app/errs"
 	"douyin/pkg/com"
+	"douyin/pkg/security"
+	"douyin/pkg/validate"
 	"github.com/gin-gonic/gin"
 )
+
+type CommentRequest struct {
+	videoId     int64  `form:"video_id"`
+	actionType  int    `form:"action_type"`
+	commentText string `form:"comment_text"`
+	commentId   string `form:"comment_id"`
+}
 
 type CommentListResponse struct {
 	com.Response
@@ -14,9 +23,14 @@ type CommentListResponse struct {
 
 // CommentAction no practical effect, just check if token is valid
 func CommentAction(c *gin.Context) {
-	token := c.Query("token")
+	myUserId := security.GetUserId(c)
 
-	if _, exist := usersLoginInfo[token]; exist {
+	rq := validate.StructQuery(c, &CommentRequest{})
+	if rq == nil {
+		return
+	}
+
+	if myUserId > 0 {
 		com.SuccessStatus(c)
 	} else {
 		com.Error(c, errs.UserNotFound)
