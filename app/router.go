@@ -24,7 +24,7 @@ func initRouter(r *gin.Engine) {
 	apiRouter.POST("/user/login/", api.Login)
 
 	/* security apis */
-	r.Use(security.Middleware)
+	apiRouter.Use(security.Middleware)
 	{
 		// basic apis
 		apiRouter.GET("/feed/", api.Feed)

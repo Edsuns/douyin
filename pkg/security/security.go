@@ -3,6 +3,7 @@ package security
 import (
 	"douyin/pkg/com"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -36,7 +37,10 @@ func GenerateJwt(userId int64) (string, error) {
 }
 
 func GetUserId(ctx *gin.Context) int64 {
-	return ctx.GetInt64(userIdKey)
+	if id, ok := ctx.Get(userIdKey); ok {
+		return id.(int64)
+	}
+	panic(fmt.Sprintf("GetUserId from unguarded route: %s", ctx.FullPath()))
 }
 
 // Middleware filters unauthorized requests
