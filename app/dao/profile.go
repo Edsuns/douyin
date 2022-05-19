@@ -115,6 +115,7 @@ func addFollower(tx *gorm.DB, userId, followerId int64) error {
 	// if there is a record and soft-deleted, set deleted false
 	if follower.DeletedAt.Valid {
 		follower.DeletedAt.Valid = false
+		return tx.Unscoped().Updates(&follower).Error
 	}
 	// assign ids and update/insert
 	follower.ProfileUserID = userId
