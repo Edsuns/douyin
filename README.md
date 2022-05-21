@@ -41,7 +41,9 @@
 │
 ├─pkg                 ──── [公共依赖]
 │
-└─test                ──── [测试相关]
+├─test                ──── [测试相关]
+│
+└─docs                ──── [项目文档]
 ```
 
 ## 运行
@@ -70,6 +72,11 @@ go build -o ./bin/app ./app
 ## 测试
 
 测试环境的配置文件为 [test/config.yaml](./test/config.yaml) ，测试前请做好配置工作。
+
+## 项目文档
+
+- [开发环境配置](./docs/development-setup.md)
+- [Git 使用规范](./docs/git-standard.md)
 
 ## 问题
 
