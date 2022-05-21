@@ -27,7 +27,7 @@ func init() {
 	// check ffmpeg installed correctly
 	cmd := exec.Command("ffmpeg", "-version")
 	if out, err := cmd.CombinedOutput(); err != nil {
-		panic(string(out))
+		panic("ffmpeg isn't installed: " + string(out))
 	}
 }
 
