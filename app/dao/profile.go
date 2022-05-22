@@ -143,17 +143,22 @@ func addFollowCount(tx *gorm.DB, userId int64, amount int64) error {
 
 func GetFollows(userId int64) ([]*Profile, error) {
 	var profiles []*Profile
-	err := db.Model(&Profile{}).Joins(
+	err := db.Joins(
 		"inner join profile_followers pf"+
 			" on profiles.user_id = pf.profile_user_id"+
 			" and pf.follower_user_id = ?",
 		userId,
-	).Find(&profiles).Error
+	).Where("pf.deleted_at is null").Find(&profiles).Error
 	return profiles, err
 }
 
 func GetFollowers(userId int64) ([]*Profile, error) {
-	var profile Profile
-	err := db.Preload("Followers").First(&profile, userId).Error
-	return profile.Followers, err
+	var profiles []*Profile
+	err := db.Joins(
+		"inner join profile_followers pf"+
+			" on profiles.user_id = pf.follower_user_id"+
+			" and pf.profile_user_id = ?",
+		userId,
+	).Where("pf.deleted_at is null").Find(&profiles).Error
+	return profiles, err
 }
