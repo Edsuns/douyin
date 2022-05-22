@@ -1,6 +1,7 @@
 package api
 
 import (
+	"douyin/app/dao"
 	"douyin/app/errs"
 	"douyin/app/service"
 	"douyin/pkg/com"
@@ -18,7 +19,7 @@ type UserAuthResponse struct {
 
 type UserResponse struct {
 	com.Response
-	User User `json:"user"`
+	User dao.Profile `json:"user"`
 }
 
 type UsrPwd struct {
@@ -67,14 +68,9 @@ func UserInfo(c *gin.Context) {
 	}
 
 	if profile := service.GetUserInfo(userId); profile != nil {
+		profile.IsFollow = service.IsFollowed(userId, myUserId)
 		com.Success(c, &UserResponse{
-			User: User{
-				Id:            profile.UserID,
-				Name:          profile.Name,
-				FollowCount:   profile.FollowCount,
-				FollowerCount: profile.FollowerCount,
-				IsFollow:      service.IsFollowed(userId, myUserId),
-			},
+			User: *profile,
 		})
 	} else {
 		com.Error(c, errs.UserNotFound)

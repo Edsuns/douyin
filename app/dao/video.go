@@ -9,6 +9,7 @@ type Video struct {
 	ID            int64      `gorm:"primary_key" json:"id,omitempty"`
 	AuthorID      int64      `gorm:"index" json:"-"`
 	Author        Profile    `json:"author"`
+	Title         string     `json:"title"`
 	FileID        int64      `json:"-"`
 	File          MediaFile  `json:"-"`
 	CoverID       int64      `json:"-"`
@@ -18,8 +19,10 @@ type Video struct {
 	Favorites     []*Profile `gorm:"many2many:video_favorites;" json:"-"`
 	Comments      []Comment  `gorm:"foreignKey:VideoID;references:ID" json:"-"`
 
-	PlayUrl  string `gorm:"-" json:"play_url,omitempty"`
-	CoverUrl string `gorm:"-" json:"cover_url,omitempty"`
+	// post-load
+	IsFavorite bool   `gorm:"-" json:"is_favorite"`
+	PlayUrl    string `gorm:"-" json:"play_url,omitempty"`
+	CoverUrl   string `gorm:"-" json:"cover_url,omitempty"`
 }
 
 type MediaFile struct {
@@ -30,9 +33,10 @@ type MediaFile struct {
 	SHA1 string `gorm:"not null;size:40" json:"sha1"`
 }
 
-func SaveVideoFile(authorId int64, video *MediaFile, cover *MediaFile) error {
+func SaveVideoFile(authorId int64, title string, video *MediaFile, cover *MediaFile) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		return tx.Create(&Video{
+			Title:    title,
 			AuthorID: authorId,
 			File:     *video,
 			Cover:    *cover,

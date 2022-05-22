@@ -44,10 +44,16 @@ func SaveUserAndProfile(username, password string) (*User, error) {
 		return nil, errors.New("can't get user after inserted")
 	}
 
+	defaultImg := "https://douyin.com/favicon.ico"
+	defaultSign := "nothing"
+
 	// insert Profile
 	err = tx.Create(&Profile{
-		UserID: user.ID,
-		Name:   username,
+		UserID:          user.ID,
+		Name:            username,
+		Avatar:          defaultImg,
+		BackgroundImage: defaultImg,
+		Signature:       defaultSign,
 	}).Error
 	if err != nil {
 		tx.Rollback()

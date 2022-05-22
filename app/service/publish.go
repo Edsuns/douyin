@@ -31,7 +31,7 @@ func init() {
 	}
 }
 
-func PublishVideo(userId int64, file *multipart.FileHeader) error {
+func PublishVideo(userId int64, title string, file *multipart.FileHeader) error {
 	videoExt, err := iox.GetExtension(file)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func PublishVideo(userId int64, file *multipart.FileHeader) error {
 		MIME: coverMIME,
 		SHA1: hex.EncodeToString(*coverHash),
 	}
-	err = dao.SaveVideoFile(userId, &mediaFile, &coverFile)
+	err = dao.SaveVideoFile(userId, title, &mediaFile, &coverFile)
 	if err != nil {
 		clearFiles(videoPath, coverFilePath)
 		return err

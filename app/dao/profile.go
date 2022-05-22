@@ -18,6 +18,10 @@ type Profile struct {
 	Comments      []Comment              `gorm:"foreignKey:AuthorID;references:UserID" json:"-"`
 	Version       optimisticlock.Version `json:"-"`
 
+	Avatar          string `gorm:"size:255" json:"avatar"`
+	BackgroundImage string `gorm:"size:255" json:"background_image"`
+	Signature       string `gorm:"size:255" json:"signature"`
+
 	// post-loads
 	IsFollow bool `gorm:"-" json:"is_follow,omitempty"`
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"douyin/app/dao"
+	"douyin/app/errs"
 	"douyin/app/service"
 	"douyin/pkg/com"
 	"douyin/pkg/security"
@@ -17,13 +18,19 @@ type VideoListResponse struct {
 func Publish(c *gin.Context) {
 	myUserId := security.GetUserId(c)
 
+	title := c.PostForm("title")
+	if title == "" {
+		com.Error(c, errs.EmptyTitle)
+		return
+	}
+
 	file, err := c.FormFile("data")
 	if err != nil {
 		com.Error(c, err)
 		return
 	}
 
-	if err := service.PublishVideo(myUserId, file); err != nil {
+	if err := service.PublishVideo(myUserId, title, file); err != nil {
 		com.Error(c, err)
 		return
 	}
