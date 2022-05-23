@@ -46,6 +46,21 @@
 └─docs                ──── [项目文档]
 ```
 
+## 配置
+
+| 名称 (key)        | 说明                                 | 示例值                       |
+|-----------------|------------------------------------|---------------------------|
+| port            | 项目服务监听的端口                          | 8080                      |
+| static.base-url | 静态资源的 base url，与客户端配置的 base url 一致 | http://10.51.155.205:8080 |
+| gorm.log-level  | GORM 的日志级别，info 级别会输出所执行的 SQL      | info                      |
+| mysql.host      | 数据库的 host 和 port                   | localhost:3306            |
+| mysql.database  | 存储项目数据的数据库名称                       | douyin_db                 |
+| mysql.username  | 数据库的用户名                            | root                      |
+| mysql.password  | 数据库的密码                             | admin                     |
+| jwt.issuer      | JWT Payload 里的 issuer 信息           | douyin                    |
+| jwt.secret      | 签署 JWT 的密钥                         | example                   |
+| jwt.expires-in  | JWT 的有效期                           | 2h                        |
+
 ## 运行
 
 项目配置文件为项目根目录的 [config.yaml](./config.yaml) 文件。启动项目前需做以下准备工作：
