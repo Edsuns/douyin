@@ -19,7 +19,7 @@ func Setup() {
 	db = dbx.Init(config.Val.Gorm.LogLevel, config.Val.Mysql)
 
 	err := db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-		&User{}, &Profile{}, &ProfileFollower{}, &Video{}, &MediaFile{}, &Comment{},
+		&User{}, &Profile{}, &ProfileFollower{}, &Video{}, &MediaFile{}, &Comment{}, &VideoFavorite{},
 	)
 	if err != nil {
 		panic(err)
