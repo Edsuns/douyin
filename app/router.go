@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
+func setupRouter() *gin.Engine {
 	r := gin.Default()
 	initRouter(r)
 	return r

@@ -9,7 +9,7 @@ import (
 )
 
 func prepareDao() func() {
-	config.Setup("../../test/config.yaml")
+	config.Load("../../test/")
 	dao.Setup()
 	dao.TruncateAllTables()
 	return dao.TruncateAllTables

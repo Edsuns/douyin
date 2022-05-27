@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 )
 
@@ -29,12 +30,15 @@ type Config struct {
 
 var Val *Config
 
-func Setup(config string) {
+func Load(path string) {
 	var err error
-	Val, err = loadConfig(config)
+	Val, err = loadConfig(filepath.Join(path, "config.yaml"))
 	if err != nil {
 		panic(err)
 	}
+
+	// resolve relative paths
+	Val.Static.Filepath = filepath.Join(path, Val.Static.Filepath)
 }
 
 func loadConfig(filename string) (*Config, error) {

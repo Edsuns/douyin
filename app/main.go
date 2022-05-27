@@ -6,18 +6,21 @@ import (
 	"douyin/pkg/security"
 	"douyin/pkg/validate"
 	"errors"
+	"github.com/gin-gonic/gin"
 	"log"
 	"os"
+	"path/filepath"
 )
 
-func init() {
-	config.Setup("./config.yaml")
+func Setup(path string) *gin.Engine {
+	config.Load(path)
 	security.Setup(config.Val.Jwt)
 	dao.Setup()
 	validate.Setup()
 
 	// make static filepath dirs
-	if _, err := os.Stat(config.Val.Static.Filepath); errors.Is(err, os.ErrNotExist) {
+	staticDir := filepath.Join(path, config.Val.Static.Filepath)
+	if _, err := os.Stat(staticDir); errors.Is(err, os.ErrNotExist) {
 		// does not exist
 		// mkdir
 		err := os.MkdirAll(config.Val.Static.Filepath, os.ModePerm)
@@ -25,10 +28,12 @@ func init() {
 			panic(err)
 		}
 	}
+
+	return setupRouter()
 }
 
 func main() {
-	err := SetupRouter().Run(":" + config.Val.Port)
+	err := Setup("./").Run(":" + config.Val.Port)
 	if err != nil {
 		log.Fatalln(err)
 	}
