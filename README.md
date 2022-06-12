@@ -1,5 +1,8 @@
 # 抖音极简版
 
+> - [第三届字节跳动青训营 - 后端专场](https://bytedance.feishu.cn/docs/doccnFRB1TXYJPK6yprPETHLXgd)
+> - [抖音项目说明](https://bytedance.feishu.cn/docx/doxcnbgkMy2J0Y3E6ihqrvtHXPg)
+
 抖音极简版是 2022 年字节跳动青训营的结营项目。
 
 ## 技术栈
@@ -14,7 +17,8 @@
 
 ## 文件结构
 
-```text      
+```text
+.
 │  config.yaml        ──── 配置文件
 │
 ├─app
@@ -22,7 +26,6 @@
 │  │  router.go       ──── API路由配置
 │  │
 │  ├─api              ──── [API层]
-│  │    responses.go  ──── 响应结构体
 │  │    user.go       ──── 注册、登录、用户信息
 │  │    relation.go   ──── 关注、粉丝
 │  │    feed.go       ──── 视频流
@@ -88,8 +91,15 @@ go build -o ./bin/app ./app
 
 测试环境的配置文件为 [test/config.yaml](./test/config.yaml) ，测试前请做好配置工作。
 
+## 客户端
+
+> [抖音极简版 APP](https://bytedance.feishu.cn/docs/doccnM9KkBAdyDhg8qaeGlIz7S7)
+
+APK 安装包下载地址：[飞书文档](https://qkntg1brub.feishu.cn/file/boxcn1bw0pnJ9QVQ5ru0FRxcMBc)
+
 ## 项目文档
 
+- [API 文档](https://www.apifox.cn/apidoc/shared-8cc50618-0da6-4d5e-a398-76f3b8f766c5/api-18345145)
 - [开发环境配置](./docs/development-setup.md)
 - [Git 使用规范](./docs/git-standard.md)
 
