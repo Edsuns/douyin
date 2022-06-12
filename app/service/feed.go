@@ -6,14 +6,24 @@ import (
 	"fmt"
 )
 
-func GetVideoFeed(nextTime int64) *[]dao.Video {
-	// TODO
-	videos := *dao.GetVideosByCreatedAt(nextTime)
-	for i := 0; i < len(videos); i++ {
-		videos[i].PlayUrl = toStaticUrl(videos[i].File.Key)
-		videos[i].CoverUrl = toStaticUrl(videos[i].Cover.Key)
+func GetVideoFeed(latestTime int64) []*dao.Video {
+	videos := dao.GetVideosByCreatedAtBefore(latestTime)
+	loadStaticUrls(&videos)
+	return videos
+}
+
+func GetVideoPublishList(userId int64) []*dao.Video {
+	videos := dao.GetVideosByAuthor(userId)
+	loadStaticUrls(&videos)
+	return videos
+}
+
+func loadStaticUrls(videos *[]*dao.Video) {
+	v := *videos
+	for i := 0; i < len(v); i++ {
+		v[i].PlayUrl = toStaticUrl(v[i].File.Key)
+		v[i].CoverUrl = toStaticUrl(v[i].Cover.Key)
 	}
-	return &videos
 }
 
 func toStaticUrl(fileKey string) string {

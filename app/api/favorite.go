@@ -33,6 +33,6 @@ func FavoriteAction(c *gin.Context) {
 // FavoriteList all users have same favorite video list
 func FavoriteList(c *gin.Context) {
 	com.Success(c, &VideoListResponse{
-		VideoList: make([]dao.Video, 0),
+		VideoList: []*dao.Video{},
 	})
 }

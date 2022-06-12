@@ -44,14 +44,30 @@ func SaveVideoFile(authorId int64, title string, video *MediaFile, cover *MediaF
 	})
 }
 
-func GetVideosByCreatedAt(after int64) *[]Video {
-	var videos []Video
+func GetVideosByAuthor(userId int64) (videos []*Video) {
 	err := db.Preload(
 		"Author").Preload(
 		"File").Preload(
-		"Cover").Find(&videos).Error
+		"Cover").Order(
+		"created_at desc").Find(&videos,
+		"author_id = ?", userId).Error
 	if err != nil {
-		return nil
+		// TODO: log err
+		return []*Video{}
 	}
-	return &videos
+	return videos
+}
+
+func GetVideosByCreatedAtBefore(time int64) (videos []*Video) {
+	err := db.Preload(
+		"Author").Preload(
+		"File").Preload(
+		"Cover").Order(
+		"created_at desc").Find(&videos,
+		"unix_timestamp(created_at) < ?", time).Error
+	if err != nil {
+		// TODO: log err
+		return []*Video{}
+	}
+	return videos
 }
