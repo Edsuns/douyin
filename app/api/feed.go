@@ -16,6 +16,15 @@ type FeedResponse struct {
 	NextTime  int64        `json:"next_time,omitempty"`
 }
 
+func loadVideosExtra(videos *[]*dao.Video, myUserId int64) {
+	for _, v := range *videos {
+		author := &v.Author
+		author.IsFollow = service.IsFollowed(author.UserID, myUserId)
+
+		v.IsFavorite = service.IsFavorite(v.ID, myUserId)
+	}
+}
+
 // Feed returns video feed
 func Feed(c *gin.Context) {
 	myUserId := security.GetUserId(c)
@@ -26,10 +35,7 @@ func Feed(c *gin.Context) {
 	}
 
 	videos := service.GetVideoFeed(latestTime)
-	for i := 0; i < len(videos); i++ {
-		author := &videos[i].Author
-		author.IsFollow = service.IsFollowed(author.UserID, myUserId)
-	}
+	loadVideosExtra(&videos, myUserId)
 
 	var nextTime int64 = 0
 	if len(videos) > 0 {

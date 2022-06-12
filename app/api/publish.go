@@ -51,10 +51,7 @@ func PublishList(c *gin.Context) {
 	}
 
 	videos := service.GetVideoPublishList(userId)
-	for i := 0; i < len(videos); i++ {
-		author := &videos[i].Author
-		author.IsFollow = service.IsFollowed(author.UserID, myUserId)
-	}
+	loadVideosExtra(&videos, myUserId)
 	com.Success(c, &VideoListResponse{
 		VideoList: videos,
 	})

@@ -75,6 +75,13 @@ func GetVideosByCreatedAtBefore(time int64) (videos []*Video) {
 	return videos
 }
 
+// addFavoriteCount with optimistic lock
+func addFavoriteCount(tx *gorm.DB, videoId int64, amount int64) error {
+	return dbx.SpinOptimisticLock(tx, videoId, func(user *Video) {
+		*user.FavoriteCount += amount
+	})
+}
+
 // addCommentCount with optimistic lock
 func addCommentCount(tx *gorm.DB, videoId int64, amount int64) error {
 	return dbx.SpinOptimisticLock(tx, videoId, func(user *Video) {
