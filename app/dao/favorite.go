@@ -2,7 +2,6 @@ package dao
 
 import (
 	"database/sql"
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -14,13 +13,13 @@ type VideoFavorite struct {
 	Video         Video `json:"-"`
 }
 
-func GetProfileVideos(userId int64) *[]Video {
+func GetProfileVideos(userId int64) []*Video {
 	var (
-		videos   *[]Video
+		videos   []*Video
 		videoIds []int64
 	)
-	db.Debug().Select("video_id").Where("profile_user_id=?", userId).Find(&videoIds)
-	err := db.Debug().Preload(
+	db.Select("video_id").Where("profile_user_id=?", userId).Find(&videoIds)
+	err := db.Preload(
 		"Author").Preload(
 		"File").Preload(
 		"Cover").Find(&videos, "videos.id in?", videoIds).Error
@@ -34,25 +33,35 @@ func AddFavoriteVideo(userid, videoId int64) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		return addFavoriteVideo(tx, userid, videoId)
 	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
-
 }
-func addFavoriteVideo(tx *gorm.DB, userid, videoId int64) error {
-	var videoFavorite VideoFavorite
-	videoFavorite.ProfileUserId = userid
-	videoFavorite.VideoId = videoId
-	//1、在video——favorite中添加，
-	if err := db.Unscoped().Model(&VideoFavorite{}).Update("deleted_at", nil).Error; err != nil {
-		if err := tx.Create(&videoFavorite).Error; err != nil {
-			return err
-		}
-	}
-	//2、在video中使videofavorite_count+1
 
-	//update douyin_test_db.videos set videos.favorite_count = favorite_count+1 where id= 5;
-	if err := tx.Raw("update videos set favorite_count = favorite_count+1 where id=?", videoId).Error; err != nil {
+func addFavoriteVideo(tx *gorm.DB, userId, videoId int64) (err error) {
+	var videoFavorite VideoFavorite
+
+	tx.Unscoped().First(&videoFavorite,
+		"profile_user_id = ? and video_id = ?",
+		userId, videoId)
+	// if there is an undeleted record, no need to add
+	if videoFavorite.VideoId > 0 && !videoFavorite.DeletedAt.Valid {
+		return nil
+	}
+
+	// increase FavoriteCount with optimistic lock
+	err = addFavoriteCount(tx, videoId, 1)
+	if err != nil {
 		return err
 	}
-	return nil
+
+	// if there is a record and soft-deleted, set deleted false
+	if videoFavorite.DeletedAt.Valid {
+		videoFavorite.DeletedAt.Valid = false
+		return tx.Unscoped().Updates(&videoFavorite).Error
+	}
+
+	// assign ids and update/insert
+	videoFavorite.ProfileUserId = userId
+	videoFavorite.VideoId = videoId
+	return tx.Save(&videoFavorite).Error
 }
 
 func RemoveFavoriteVideo(userId, videoId int64) error {
@@ -61,16 +70,22 @@ func RemoveFavoriteVideo(userId, videoId int64) error {
 	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
-func removeFavoriteVideo(tx *gorm.DB, userId, videoId int64) error {
+func removeFavoriteVideo(tx *gorm.DB, userId, videoId int64) (err error) {
+	var videoFavorite VideoFavorite
+	tx.Unscoped().First(&videoFavorite,
+		"profile_user_id = ? and video_id = ?",
+		userId, videoId)
+	// if no records or record is soft-deleted, no need to delete
+	if videoFavorite.ProfileUserId <= 0 || videoFavorite.DeletedAt.Valid {
+		return nil
+	}
 
-	if err := tx.Where("profile_user_id =? and video_id=?", userId, videoId).Delete(&VideoFavorite{}).Error; err != nil {
-		fmt.Println(err)
+	// decrease FavoriteCount with optimistic lock
+	err = addFavoriteCount(tx, userId, -1)
+	if err != nil {
 		return err
 	}
-	if err := tx.Raw("update videos set favorite_count = favorite_count-1 where id=?", videoId).Error; err != nil {
-		fmt.Println(err)
-		return err
-	}
 
-	return nil
+	// soft delete the record
+	return tx.Delete(&videoFavorite).Error
 }
