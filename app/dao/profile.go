@@ -10,8 +10,8 @@ import (
 type Profile struct {
 	UserID        int64                  `gorm:"primary_key;autoIncrement:false" json:"id"`
 	Name          string                 `gorm:"size:63" json:"name"`
-	FollowCount   int64                  `json:"follow_count"`
-	FollowerCount int64                  `json:"follower_count"`
+	FollowCount   *int64                 `json:"follow_count"`
+	FollowerCount *int64                 `json:"follower_count"`
 	Followers     []*Profile             `gorm:"many2many:profile_followers;" json:"-"`
 	Videos        []Video                `gorm:"foreignKey:AuthorID;references:UserID" json:"-"`
 	Favorites     []*Video               `gorm:"many2many:video_favorites;" json:"-"`
@@ -130,14 +130,14 @@ func addFollower(tx *gorm.DB, userId, followerId int64) error {
 // addFollowerCount with optimistic lock
 func addFollowerCount(tx *gorm.DB, userId int64, amount int64) error {
 	return dbx.SpinOptimisticLock(tx, userId, func(user *Profile) {
-		user.FollowerCount += amount
+		*user.FollowerCount += amount
 	})
 }
 
 // addFollowCount with optimistic lock
 func addFollowCount(tx *gorm.DB, userId int64, amount int64) error {
 	return dbx.SpinOptimisticLock(tx, userId, func(user *Profile) {
-		user.FollowCount += amount
+		*user.FollowCount += amount
 	})
 }
 
