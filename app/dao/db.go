@@ -10,7 +10,7 @@ import (
 type Model struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 var db *gorm.DB
