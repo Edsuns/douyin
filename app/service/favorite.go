@@ -21,15 +21,16 @@ func ChangeFavorite(userId, videoId int64, actionType int) bool {
 	return false
 }
 
-func GetFavorite(userId int64) []dao.Video {
-	videos := *dao.GetProfileVideos(userId)
+func GetFavorite(userId int64) []*dao.Video {
+	videos := dao.GetFavoriteVideos(userId)
 	if videos == nil {
-		return []dao.Video{}
+		return []*dao.Video{}
 	}
-	for i := 0; i < len(videos); i++ {
-		videos[i].PlayUrl = toStaticUrl(videos[i].File.Key)
-		videos[i].CoverUrl = toStaticUrl(videos[i].Cover.Key)
-	}
+	loadStaticUrls(&videos)
 	return videos
+}
 
+func IsFavorite(videoId, userId int64) bool {
+	yes, _ := dao.HasFavorite(videoId, userId)
+	return yes
 }
