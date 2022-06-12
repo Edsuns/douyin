@@ -36,7 +36,7 @@ func AddOrDeleteComment(userId int64, videoId int64,
 	return nil, errs.ActionTypeNotFound
 }
 
-func GetComments(videoId int64) ([]dao.Comment, error) {
+func GetComments(videoId int64) ([]*dao.Comment, error) {
 	if videoId <= 0 {
 		return nil, errs.VideoIdNotFound
 	}

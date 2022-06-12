@@ -65,9 +65,8 @@ func DeleteComment(commentId int64) error {
 	return nil
 }
 
-func GetComments(videoId int64) ([]Comment, error) {
+func GetComments(videoId int64) (comments []*Comment, err error) {
 	tx := db.Begin()
-
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -76,8 +75,7 @@ func GetComments(videoId int64) ([]Comment, error) {
 		}
 	}()
 
-	var comments []Comment
-	err := db.Where("video_id = ?", videoId).Find(&comments).Error
+	err = db.Where("video_id = ?", videoId).Find(&comments).Error
 	if err != nil {
 		tx.Rollback()
 		return nil, err

@@ -26,7 +26,7 @@ type CommentResponse struct {
 
 type CommentListResponse struct {
 	com.Response
-	CommentList []dao.Comment `json:"comment_list,omitempty"`
+	CommentList []*dao.Comment `json:"comment_list,omitempty"`
 }
 
 // CommentAction add or delete a comment
