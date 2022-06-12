@@ -47,14 +47,18 @@ func SaveUserAndProfile(username, password string) (*User, error) {
 	defaultImg := "https://douyin.com/favicon.ico"
 	defaultSign := "nothing"
 
-	// insert Profile
-	err = tx.Create(&Profile{
+	profile := Profile{
 		UserID:          user.ID,
 		Name:            username,
 		Avatar:          defaultImg,
 		BackgroundImage: defaultImg,
 		Signature:       defaultSign,
-	}).Error
+	}
+	var zero int64 = 0
+	profile.FollowCount = &zero
+	profile.FollowerCount = &zero
+	// insert Profile
+	err = tx.Create(&profile).Error
 	if err != nil {
 		tx.Rollback()
 		return nil, err

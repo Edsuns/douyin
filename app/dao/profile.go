@@ -130,6 +130,11 @@ func addFollower(tx *gorm.DB, userId, followerId int64) error {
 // addFollowerCount with optimistic lock
 func addFollowerCount(tx *gorm.DB, userId int64, amount int64) error {
 	return dbx.SpinOptimisticLock(tx, userId, func(user *Profile) {
+		if user.FollowerCount == nil {
+			var one int64 = 1
+			user.FollowerCount = &one
+			return
+		}
 		*user.FollowerCount += amount
 	})
 }
@@ -137,6 +142,11 @@ func addFollowerCount(tx *gorm.DB, userId int64, amount int64) error {
 // addFollowCount with optimistic lock
 func addFollowCount(tx *gorm.DB, userId int64, amount int64) error {
 	return dbx.SpinOptimisticLock(tx, userId, func(user *Profile) {
+		if user.FollowCount == nil {
+			var one int64 = 1
+			user.FollowCount = &one
+			return
+		}
 		*user.FollowCount += amount
 	})
 }

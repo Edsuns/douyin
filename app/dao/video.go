@@ -38,12 +38,16 @@ type MediaFile struct {
 
 func SaveVideoFile(authorId int64, title string, video *MediaFile, cover *MediaFile) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		return tx.Create(&Video{
+		v := Video{
 			Title:    title,
 			AuthorID: authorId,
 			File:     *video,
 			Cover:    *cover,
-		}).Error
+		}
+		var zero int64 = 0
+		v.FavoriteCount = &zero
+		v.CommentCount = &zero
+		return tx.Create(&v).Error
 	})
 }
 
@@ -77,14 +81,24 @@ func GetVideosByCreatedAtBefore(time int64) (videos []*Video) {
 
 // addFavoriteCount with optimistic lock
 func addFavoriteCount(tx *gorm.DB, videoId int64, amount int64) error {
-	return dbx.SpinOptimisticLock(tx, videoId, func(user *Video) {
-		*user.FavoriteCount += amount
+	return dbx.SpinOptimisticLock(tx, videoId, func(video *Video) {
+		if video.FavoriteCount == nil {
+			var one int64 = 1
+			video.FavoriteCount = &one
+			return
+		}
+		*video.FavoriteCount += amount
 	})
 }
 
 // addCommentCount with optimistic lock
 func addCommentCount(tx *gorm.DB, videoId int64, amount int64) error {
-	return dbx.SpinOptimisticLock(tx, videoId, func(user *Video) {
-		*user.CommentCount += amount
+	return dbx.SpinOptimisticLock(tx, videoId, func(video *Video) {
+		if video.CommentCount == nil {
+			var one int64 = 1
+			video.CommentCount = &one
+			return
+		}
+		*video.CommentCount += amount
 	})
 }
