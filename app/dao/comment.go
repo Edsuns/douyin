@@ -1,5 +1,10 @@
 package dao
 
+import (
+	"database/sql"
+	"gorm.io/gorm"
+)
+
 type Comment struct {
 	Model    `json:"-"`
 	Id       int64   `json:"id,omitempty"`
@@ -23,12 +28,19 @@ func SaveComment(userId int64, videoId int64, content string) (*Comment, error) 
 	}()
 
 	var err error
-	pcomment := Comment{
+
+	// increase CommentCount with optimistic lock
+	err = addCommentCount(tx, videoId, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	c := Comment{
 		AuthorID: userId,
 		VideoID:  videoId,
 		Content:  content,
 	}
-	err = tx.Create(&pcomment).Error
+	err = tx.Create(&c).Error
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -36,8 +48,8 @@ func SaveComment(userId int64, videoId int64, content string) (*Comment, error) 
 
 	var comment Comment
 	err = tx.First(&comment, "id = ?",
-		pcomment.Id).First(&comment.Author,
-		"author_id = ?", pcomment.AuthorID).Error
+		c.Id).First(&comment.Author,
+		"author_id = ?", c.AuthorID).Error
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -47,22 +59,26 @@ func SaveComment(userId int64, videoId int64, content string) (*Comment, error) 
 }
 
 func DeleteComment(commentId int64) error {
-	tx := db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
+	return db.Transaction(func(tx *gorm.DB) (err error) {
+		var comment Comment
+
+		err = tx.Find(&comment, "id = ?", commentId).Error
+		if err != nil {
+			return err
 		}
-	}()
+		// decrease CommentCount with optimistic lock
+		err = addCommentCount(tx, comment.VideoID, -1)
+		if err != nil {
+			return err
+		}
 
-	err := tx.Where("id = ?", commentId).Delete(&Comment{}).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+		err = tx.Delete(&comment).Error
+		if err != nil {
+			return err
+		}
 
-	return nil
+		return nil
+	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
 func GetComments(videoId int64) (comments []*Comment, err error) {
