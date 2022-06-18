@@ -8,6 +8,7 @@ import (
 )
 
 func setupRouter() *gin.Engine {
+	gin.SetMode(config.Val.Gin.LogLevel)
 	r := gin.Default()
 	initRouter(r)
 	return r

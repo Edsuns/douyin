@@ -20,6 +20,9 @@ type Config struct {
 		Filepath string
 	}
 
+	Gin struct {
+		LogLevel string `yaml:"log-level"`
+	}
 	Gorm struct {
 		LogLevel string `yaml:"log-level"`
 	}

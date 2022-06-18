@@ -5,6 +5,8 @@ static:
   route: /static
   filepath: ./tmp/public
 
+gin:
+  log-level: debug
 gorm:
   log-level: silent
 mysql:

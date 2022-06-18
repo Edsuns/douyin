@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yaml:${APP_PATH}/config.yaml
+      - ./tmp/:${APP_PATH}/tmp/
+    depends_on:
+      - mysql
+    command: [ "./wait-for", "mysql:3306", "--timeout=30", "--", "./douyin" ]
+  mysql:
+    image: 'mysql:8'
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=douyin_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=usr_pwd
+      - MYSQL_RANDOM_ROOT_PASSWORD="yes"
