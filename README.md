@@ -51,10 +51,13 @@
 
 ## 配置
 
+项目配置文件为项目根目录的 [config.yaml](./config.yaml) 文件。
+
 | 名称 (key)        | 说明                                 | 示例值                       |
 |-----------------|------------------------------------|---------------------------|
 | port            | 项目服务监听的端口                          | 8080                      |
 | static.base-url | 静态资源的 base url，与客户端配置的 base url 一致 | http://10.51.155.205:8080 |
+| gin.log-level   | Gin 的日志级别，生产环境请设置为 release         | debug                     |
 | gorm.log-level  | GORM 的日志级别，info 级别会输出所执行的 SQL      | info                      |
 | mysql.host      | 数据库的 host 和 port                   | localhost:3306            |
 | mysql.database  | 存储项目数据的数据库名称                       | douyin_db                 |
@@ -66,7 +69,17 @@
 
 ## 运行
 
-项目配置文件为项目根目录的 [config.yaml](./config.yaml) 文件。启动项目前需做以下准备工作：
+### 方式一：使用 Docker 运行
+
+先配置好 [config.yaml](./config.yaml) 文件里的 `static.base-url`，然后执行：
+
+```shell
+docker-compose up
+```
+
+### 方式二：在本机运行
+
+启动项目前需完成运行环境的配置：
 
 - 安装 Go
 - 安装 [FFmpeg](https://ffmpeg.org/download.html)
