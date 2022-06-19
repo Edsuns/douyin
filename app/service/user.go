@@ -8,25 +8,32 @@ import (
 )
 
 // Register create a new account
-func Register(username, password string) (*dao.User, error) {
+func Register(username, password string) (user *dao.User, err error) {
 	// validate the params
-	if err := assert.NotEmpty(username, password); err != nil {
+	if err = assert.NotEmpty(username, password); err != nil {
 		return nil, err
 	}
 	// check if exists
-	if dao.GetUserByUsername(username) != nil {
+	exists, err := dao.ExistsUserByUsername(username)
+	if exists {
 		return nil, errs.UserAlreadyExists
 	}
+	if err != nil {
+		return nil, err
+	}
 	// insert into database if not exist
-	user, err := dao.SaveUserAndProfile(username, password)
+	user, err = dao.SaveUserAndProfile(username, password)
 	return user, err
 }
 
 // Login returns User and token if login successfully, or both nil
 func Login(username, password string) (*dao.User, *string) {
 	// check if user exists
-	user := dao.GetUserByUsername(username)
-	if user == nil {
+	user, err := dao.GetUserByUsername(username)
+	if user == nil || err != nil {
+		if err != nil {
+			// TODO: log error
+		}
 		return nil, nil
 	}
 	// verify the password
@@ -54,6 +61,9 @@ func GetUserInfo(userId int64) *dao.Profile {
 }
 
 func IsFollowed(userId, followerId int64) bool {
+	if userId == followerId {
+		return false
+	}
 	yes, _ := dao.HasFollower(userId, followerId)
 	return yes
 }

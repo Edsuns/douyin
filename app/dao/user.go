@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"douyin/pkg/dbx"
 	"douyin/pkg/security"
 	"errors"
 )
@@ -13,18 +14,19 @@ type User struct {
 	Profile  Profile `json:"-"`
 }
 
-func SaveUserAndProfile(username, password string) (*User, error) {
+func SaveUserAndProfile(username, password string) (user *User, err error) {
 	// start a transaction
 	tx := db.Begin()
 	defer func() {
-		if r := recover(); r != nil {
+		if r := recover(); r != nil || err != nil {
 			tx.Rollback()
 		} else {
 			tx.Commit()
 		}
 	}()
-
-	var err error
+	if err = tx.Error; err != nil {
+		return nil, err
+	}
 
 	// insert User
 	err = tx.Create(&User{
@@ -32,15 +34,12 @@ func SaveUserAndProfile(username, password string) (*User, error) {
 		Password: security.EncodePassword(password),
 	}).Error
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
 	// query User ID
-	var user User
 	err = tx.First(&user, "username = ?", username).Error
 	if user.ID == 0 || err != nil {
-		tx.Rollback()
 		return nil, errors.New("can't get user after inserted")
 	}
 
@@ -60,20 +59,23 @@ func SaveUserAndProfile(username, password string) (*User, error) {
 	// insert Profile
 	err = tx.Create(&profile).Error
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
+	return user, nil
+}
+
+func GetUserByUsername(username string) (*User, error) {
+	var user User
+	err := db.First(&user, "username = ?", username).Error
+	if err != nil {
+		return nil, err
+	}
 	return &user, nil
 }
 
-func GetUserByUsername(username string) *User {
-	var user User
-	db.First(&user, "username = ?", username)
-	if user.ID > 0 {
-		return &user
-	}
-	return nil
+func ExistsUserByUsername(username string) (bool, error) {
+	return dbx.Exists(db, &User{}, "username = ?", username)
 }
 
 func GetUserByUserId(userId int64) *User {

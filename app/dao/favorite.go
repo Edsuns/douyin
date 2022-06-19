@@ -2,6 +2,8 @@ package dao
 
 import (
 	"database/sql"
+	"douyin/pkg/dbx"
+	"errors"
 	"gorm.io/gorm"
 )
 
@@ -28,14 +30,9 @@ func GetFavoriteVideos(userId int64) []*Video {
 }
 
 func HasFavorite(videoId, userId int64) (bool, error) {
-	var videoFavorite VideoFavorite
-	err := db.First(&videoFavorite,
+	return dbx.Exists(db, &VideoFavorite{},
 		"video_id = ? and profile_user_id = ?",
-		videoId, userId).Error
-	if err != nil {
-		return false, err
-	}
-	return videoFavorite.VideoId > 0, nil
+		videoId, userId)
 }
 
 func AddFavoriteVideo(userId, videoId int64) error {
@@ -51,7 +48,10 @@ func addFavoriteVideo(tx *gorm.DB, userId, videoId int64) (err error) {
 		"profile_user_id = ? and video_id = ?",
 		userId, videoId)
 	// if there is an undeleted record, no need to add
-	if videoFavorite.VideoId > 0 && !videoFavorite.DeletedAt.Valid {
+	if !errors.Is(err, gorm.ErrRecordNotFound) && !videoFavorite.DeletedAt.Valid {
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 
@@ -85,8 +85,11 @@ func removeFavoriteVideo(tx *gorm.DB, userId, videoId int64) (err error) {
 		"profile_user_id = ? and video_id = ?",
 		userId, videoId)
 	// if no records or record is soft-deleted, no need to delete
-	if videoFavorite.ProfileUserId <= 0 || videoFavorite.DeletedAt.Valid {
+	if errors.Is(err, gorm.ErrRecordNotFound) || videoFavorite.DeletedAt.Valid {
 		return nil
+	}
+	if err != nil {
+		return err
 	}
 
 	// decrease FavoriteCount with optimistic lock

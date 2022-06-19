@@ -3,6 +3,7 @@ package dao
 import (
 	"database/sql"
 	"douyin/pkg/dbx"
+	"errors"
 	"gorm.io/gorm"
 	"gorm.io/plugin/optimisticlock"
 )
@@ -44,14 +45,9 @@ func GetProfileByUserId(userId int64) *Profile {
 }
 
 func HasFollower(userId, followerId int64) (bool, error) {
-	var follower ProfileFollower
-	err := db.First(&follower,
+	return dbx.Exists(db, &ProfileFollower{},
 		"profile_user_id = ? and follower_user_id = ?",
-		userId, followerId).Error
-	if err != nil {
-		return false, err
-	}
-	return follower.FollowerUserID > 0, nil
+		userId, followerId)
 }
 
 func RemoveFollower(userId, followerId int64) error {
@@ -60,17 +56,18 @@ func RemoveFollower(userId, followerId int64) error {
 	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
-func removeFollower(tx *gorm.DB, userId, followerId int64) error {
+func removeFollower(tx *gorm.DB, userId, followerId int64) (err error) {
 	var follower ProfileFollower
-	tx.Unscoped().First(&follower,
+	err = tx.Unscoped().First(&follower,
 		"profile_user_id = ? and follower_user_id = ?",
-		userId, followerId)
+		userId, followerId).Error
 	// if no records or record is soft-deleted, no need to delete
-	if follower.FollowerUserID <= 0 || follower.DeletedAt.Valid {
+	if errors.Is(err, gorm.ErrRecordNotFound) || follower.DeletedAt.Valid {
 		return nil
 	}
-
-	var err error
+	if err != nil {
+		return err
+	}
 
 	// decrease FollowerCount with optimistic lock
 	err = addFollowerCount(tx, userId, -1)
@@ -93,17 +90,18 @@ func AddFollower(userId, followerId int64) error {
 	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
-func addFollower(tx *gorm.DB, userId, followerId int64) error {
+func addFollower(tx *gorm.DB, userId, followerId int64) (err error) {
 	var follower ProfileFollower
-	tx.Unscoped().First(&follower,
+	err = tx.Unscoped().First(&follower,
 		"profile_user_id = ? and follower_user_id = ?",
-		userId, followerId)
+		userId, followerId).Error
 	// if there is an undeleted record, no need to add
-	if follower.FollowerUserID > 0 && !follower.DeletedAt.Valid {
+	if !errors.Is(err, gorm.ErrRecordNotFound) && !follower.DeletedAt.Valid {
+		if err != nil {
+			return err
+		}
 		return nil
 	}
-
-	var err error
 
 	// increase FollowerCount with optimistic lock
 	err = addFollowerCount(tx, userId, 1)

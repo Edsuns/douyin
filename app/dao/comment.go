@@ -17,22 +17,23 @@ type Comment struct {
 	CreateDate string `gorm:"-" json:"create_date"`
 }
 
-func SaveComment(userId int64, videoId int64, content string) (*Comment, error) {
+func SaveComment(userId int64, videoId int64, content string) (comment *Comment, err error) {
+	// start a transaction
 	tx := db.Begin()
 	defer func() {
-		if r := recover(); r != nil {
+		if r := recover(); r != nil || err != nil {
 			tx.Rollback()
 		} else {
 			tx.Commit()
 		}
 	}()
-
-	var err error
+	if err = tx.Error; err != nil {
+		return nil, err
+	}
 
 	// increase CommentCount with optimistic lock
 	err = addCommentCount(tx, videoId, 1)
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
@@ -43,20 +44,17 @@ func SaveComment(userId int64, videoId int64, content string) (*Comment, error) 
 	}
 	err = tx.Create(&c).Error
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
-	var comment Comment
 	err = tx.First(&comment, "id = ?",
 		c.Id).First(&comment.Author,
 		"author_id = ?", c.AuthorID).Error
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
-	return &comment, nil
+	return comment, nil
 }
 
 func DeleteComment(commentId int64, authorId int64) error {
