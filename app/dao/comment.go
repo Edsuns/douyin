@@ -2,7 +2,6 @@ package dao
 
 import (
 	"database/sql"
-	"douyin/app/errs"
 	"gorm.io/gorm"
 )
 
@@ -33,6 +32,7 @@ func SaveComment(userId int64, videoId int64, content string) (*Comment, error) 
 	// increase CommentCount with optimistic lock
 	err = addCommentCount(tx, videoId, 1)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -65,7 +65,7 @@ func DeleteComment(commentId int64, authorId int64) error {
 
 		err = tx.Find(&comment, "id = ? and author_id = ?", commentId, authorId).Error
 		if err != nil {
-			return errs.CommentDoNotBelongToYou
+			return err
 		}
 		// decrease CommentCount with optimistic lock
 		err = addCommentCount(tx, comment.VideoID, -1)
@@ -82,28 +82,12 @@ func DeleteComment(commentId int64, authorId int64) error {
 	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
-func GetComments(videoId int64) (comments []*Comment, err error) {
-	tx := db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		} else {
-			tx.Commit()
-		}
-	}()
-
-	err = db.Where("video_id = ?", videoId).Find(&comments).Error
+func GetComments(videoId int64) ([]*Comment, error) {
+	var comments []*Comment
+	err := db.Where("video_id = ?", videoId).Preload(
+		"Author").Find(&comments).Error
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
-
-	for _, comment := range comments {
-		err = db.Where("user_id = ?", comment.AuthorID).First(&comment.Author).Error
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return comments, nil
 }

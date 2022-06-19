@@ -4,6 +4,8 @@ import (
 	"douyin/app/dao"
 	"douyin/app/errs"
 	"douyin/pkg/assert"
+	"errors"
+	"gorm.io/gorm"
 )
 
 func AddOrDeleteComment(userId int64, videoId int64,
@@ -29,6 +31,9 @@ func AddOrDeleteComment(userId int64, videoId int64,
 		}
 
 		err := dao.DeleteComment(commentId, userId)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.CommentDoNotBelongToYou
+		}
 		// both can be nil
 		return nil, err
 	}
