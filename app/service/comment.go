@@ -28,7 +28,7 @@ func AddOrDeleteComment(userId int64, videoId int64,
 			return nil, errs.CommentIdNotFound
 		}
 
-		err := dao.DeleteComment(commentId)
+		err := dao.DeleteComment(commentId, userId)
 		// both can be nil
 		return nil, err
 	}

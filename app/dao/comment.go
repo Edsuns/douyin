@@ -2,6 +2,7 @@ package dao
 
 import (
 	"database/sql"
+	"douyin/app/errs"
 	"gorm.io/gorm"
 )
 
@@ -58,13 +59,13 @@ func SaveComment(userId int64, videoId int64, content string) (*Comment, error) 
 	return &comment, nil
 }
 
-func DeleteComment(commentId int64) error {
+func DeleteComment(commentId int64, authorId int64) error {
 	return db.Transaction(func(tx *gorm.DB) (err error) {
 		var comment Comment
 
-		err = tx.Find(&comment, "id = ?", commentId).Error
+		err = tx.Find(&comment, "id = ? and author_id = ?", commentId, authorId).Error
 		if err != nil {
-			return err
+			return errs.CommentDoNotBelongToYou
 		}
 		// decrease CommentCount with optimistic lock
 		err = addCommentCount(tx, comment.VideoID, -1)
