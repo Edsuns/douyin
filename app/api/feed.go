@@ -30,7 +30,7 @@ func Feed(c *gin.Context) {
 	myUserId := security.GetUserId(c)
 
 	latestTime, err := strconv.ParseInt(c.Query("latest_time"), 10, 64)
-	if err != nil {
+	if err != nil || latestTime <= 0 {
 		latestTime = time.Now().UnixMilli()
 	}
 
