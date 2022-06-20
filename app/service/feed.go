@@ -7,7 +7,7 @@ import (
 )
 
 func GetVideoFeed(latestTime int64) []*dao.Video {
-	videos := dao.GetVideosByCreatedAtBefore(latestTime)
+	videos := dao.GetVideosByCreatedAtBefore(latestTime, 20)
 	loadStaticUrls(&videos)
 	return videos
 }

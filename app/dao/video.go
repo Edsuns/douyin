@@ -65,12 +65,12 @@ func GetVideosByAuthor(userId int64) (videos []*Video) {
 	return videos
 }
 
-func GetVideosByCreatedAtBefore(time int64) (videos []*Video) {
+func GetVideosByCreatedAtBefore(time int64, limit int) (videos []*Video) {
 	err := db.Preload(
 		"Author").Preload(
 		"File").Preload(
 		"Cover").Order(
-		"created_at desc").Find(&videos,
+		"created_at desc").Limit(limit).Find(&videos,
 		"unix_timestamp(created_at) < ?", time).Error
 	if err != nil {
 		// TODO: log err
